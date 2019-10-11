@@ -137,7 +137,7 @@ if __name__ == '__main__':
                   lr=args.lr,
                   gpu=args.gpu,
                   img_scale=args.scale)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:           # 异常处理👍，出错的话就会save下来
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
         print('Saved interrupt')
         try:

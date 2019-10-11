@@ -4,6 +4,7 @@ import numpy as np
 
 def get_square(img, pos):
     """Extract a left or a right square from ndarray shape : (H, W, C))"""
+    '''顺序(H, W, C)，取和高度相同的宽'''
     h = img.shape[0]
     if pos == 0:
         return img[:, :h]
@@ -11,12 +12,15 @@ def get_square(img, pos):
         return img[:, -h:]
 
 def split_img_into_squares(img):
+    # 返回生成的right&left square，因为原文是处理正方形的
     return get_square(img, 0), get_square(img, 1)
 
 def hwc_to_chw(img):
+    '''height, width, channel -> channel, height, width'''
     return np.transpose(img, axes=[2, 0, 1])
 
 def resize_and_crop(pilimg, scale=0.5, final_height=None):
+    # 缩放和裁剪
     w = pilimg.size[0]
     h = pilimg.size[1]
     newW = int(w * scale)
@@ -28,7 +32,8 @@ def resize_and_crop(pilimg, scale=0.5, final_height=None):
         diff = newH - final_height
 
     img = pilimg.resize((newW, newH))
-    img = img.crop((0, diff // 2, newW, newH - diff // 2))
+    img = img.crop((0, diff // 2, newW, newH - diff // 2))  # (left, upper, right, lower)-tuple
+    img = np.array(img, dtype=np.float32)
     return np.array(img, dtype=np.float32)
 
 def batch(iterable, batch_size):
@@ -59,7 +64,7 @@ def merge_masks(img1, img2, full_w):
 
     new = np.zeros((h, full_w), np.float32)
     new[:, :full_w // 2 + 1] = img1[:, :full_w // 2 + 1]
-    new[:, full_w // 2 + 1:] = img2[:, -(full_w // 2 - 1):]
+    new[:, full_w // 2 + 1:] = img2[:, -(full_w // 2):]
 
     return new
 

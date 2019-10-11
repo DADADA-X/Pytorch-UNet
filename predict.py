@@ -6,6 +6,7 @@ import torch
 import torch.nn.functional as F
 
 from PIL import Image
+import matplotlib.pyplot as plt
 
 from unet import UNet
 from utils import resize_and_crop, normalize, split_img_into_squares, hwc_to_chw, merge_masks, dense_crf
@@ -78,7 +79,7 @@ def get_args():
     parser.add_argument('--input', '-i', metavar='INPUT', nargs='+',
                         help='filenames of input images', required=True)
 
-    parser.add_argument('--output', '-o', metavar='INPUT', nargs='+',
+    parser.add_argument('--output', '-o', metavar='OUTPUT', nargs='+',
                         help='filenames of ouput images')
     parser.add_argument('--cpu', '-c', action='store_true',
                         help="Do not use the cuda version of the net",
@@ -143,7 +144,10 @@ if __name__ == "__main__":
     for i, fn in enumerate(in_files):
         print("\nPredicting image {} ...".format(fn))
 
-        img = Image.open(fn)
+        img = Image.open(fn).convert('RGB')
+
+        # plt.imshow(img)
+        # plt.show()
         if img.size[0] < img.size[1]:
             print("Error: image height larger than the width")
 
