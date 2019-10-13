@@ -25,10 +25,10 @@ def train_net(net,
     dir_mask = 'data/train_masks/'
     dir_checkpoint = 'checkpoints/'
 
-    ids = get_ids(dir_img)
-    ids = split_ids(ids)
+    ids = get_ids(dir_img)  # 返回train文件夹下文件的名字列表，生成器（except last 4 character，.jpg这样的）
+    ids = split_ids(ids)    # 返回(id, i), id属于ids，i属于range(n)，相当于把train的图✖️了n倍多张，是tuple的生成器
 
-    iddataset = split_train_val(ids, val_percent)
+    iddataset = split_train_val(ids, val_percent)   # validation percentage，是dict = {"train": ___(一个list), "val"：___(一个list)}
 
     print('''
     Starting training:
@@ -58,7 +58,6 @@ def train_net(net,
         # reset the generators
         train = get_imgs_and_masks(iddataset['train'], dir_img, dir_mask, img_scale)
         val = get_imgs_and_masks(iddataset['val'], dir_img, dir_mask, img_scale)
-
         epoch_loss = 0
 
         for i, b in enumerate(batch(train, batch_size)):

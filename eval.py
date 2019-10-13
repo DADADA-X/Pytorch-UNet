@@ -22,5 +22,5 @@ def eval_net(net, dataset, gpu=False):
         mask_pred = net(img)[0]
         mask_pred = (mask_pred > 0.5).float()
 
-        tot += dice_coeff(mask_pred, true_mask).item()
+        tot += dice_coeff(mask_pred, true_mask).item()  # dice系数
     return tot / (i + 1)

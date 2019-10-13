@@ -2,6 +2,7 @@ import numpy as np
 import pydensecrf.densecrf as dcrf
 
 def dense_crf(img, output_probs):
+    # 条件随机场，是语义分割在fcn之后的一种方法
     h = output_probs.shape[0]
     w = output_probs.shape[1]
 
@@ -9,7 +10,7 @@ def dense_crf(img, output_probs):
     output_probs = np.append(1 - output_probs, output_probs, axis=0)
 
     d = dcrf.DenseCRF2D(w, h, 2)
-    U = -np.log(output_probs)
+    U = -np.log(output_probs + 1e-5)
     U = U.reshape((2, -1))
     U = np.ascontiguousarray(U)
     img = np.ascontiguousarray(img)

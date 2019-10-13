@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import math
 
 
 def get_square(img, pos):
@@ -20,7 +21,7 @@ def hwc_to_chw(img):
     return np.transpose(img, axes=[2, 0, 1])
 
 def resize_and_crop(pilimg, scale=0.5, final_height=None):
-    # 缩放和裁剪
+    # 缩放和裁剪，返回nparray
     w = pilimg.size[0]
     h = pilimg.size[1]
     newW = int(w * scale)
@@ -44,7 +45,7 @@ def batch(iterable, batch_size):
         if (i + 1) % batch_size == 0:
             yield b
             b = []
-
+    # 处理还剩的不满一个batch_size的数据
     if len(b) > 0:
         yield b
 
@@ -63,8 +64,8 @@ def merge_masks(img1, img2, full_w):
     h = img1.shape[0]
 
     new = np.zeros((h, full_w), np.float32)
-    new[:, :full_w // 2 + 1] = img1[:, :full_w // 2 + 1]
-    new[:, full_w // 2 + 1:] = img2[:, -(full_w // 2):]
+    new[:, :full_w//2] = img1[:, :full_w//2]
+    new[:, full_w//2:] = img2[:, full_w//2-full_w:]
 
     return new
 

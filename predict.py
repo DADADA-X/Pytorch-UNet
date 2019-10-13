@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
     print("Model loaded !")
 
-    for i, fn in enumerate(in_files):
+    for i, fn in enumerate(in_files):       # 问题：不用mini_batch吗？不用，训练时用
         print("\nPredicting image {} ...".format(fn))
 
         img = Image.open(fn).convert('RGB')

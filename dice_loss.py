@@ -3,6 +3,7 @@ from torch.autograd import Function, Variable
 
 class DiceCoeff(Function):
     """Dice coeff for individual examples"""
+    '''每个样本的dice系数'''
 
     def forward(self, input, target):
         self.save_for_backward(input, target)

@@ -17,7 +17,7 @@ class UNet(nn.Module):
         self.up2 = up(512, 256, None)
         self.up3 = up(256, 128, None)
         self.up4 = up(128, 64, None)'''
-        self.down4 = down(512, 512)         # 这里的output_channel有一点点confusing
+        self.down4 = down(512, 512)         # 这里的output_channel有一点点confusing - 乱写的
         self.up1 = up(1024, 256)
         self.up2 = up(512, 128)
         self.up3 = up(256, 64)
@@ -35,4 +35,7 @@ class UNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         x = self.outc(x)
-        return F.sigmoid(x)
+        if x.size()[1] == 1:
+            return torch.sigmoid(x)
+        else:
+            return F.softmax(x, dim=1)
