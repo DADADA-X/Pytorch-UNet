@@ -1,6 +1,6 @@
 import sys
 import os
-from optparse import OptionParser
+import argparse
 import numpy as np
 
 import torch
@@ -12,18 +12,24 @@ from eval import eval_net
 from unet import UNet
 from utils import get_ids, split_ids, split_train_val, get_imgs_and_masks, batch
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 def train_net(net,
               epochs=5,
               batch_size=1,
-              lr=0.1,
+              lr=1e-3,
               val_percent=0.05,
               save_cp=True,
               gpu=False,
               img_scale=0.5):
 
-    dir_img = 'data/train/'
-    dir_mask = 'data/train_masks/'
+    dir_img = '/home/xyj/test/Pytorch-UNet/data/train/'
+    dir_mask = '/home/xyj/test/Pytorch-UNet/data/train_masks/'
     dir_checkpoint = 'checkpoints/'
+    
+    if not os.path.exists(dir_checkpoint):
+        os.mkdir(dir_checkpoint)
 
     ids = get_ids(dir_img)  # 返回train文件夹下文件的名字列表，生成器（except last 4 character，.jpg这样的）
     ids = split_ids(ids)    # 返回(id, i), id属于ids，i属于range(n)，相当于把train的图✖️了n倍多张，是tuple的生成器
@@ -44,11 +50,14 @@ def train_net(net,
 
     N_train = len(iddataset['train'])
 
-    optimizer = optim.SGD(net.parameters(),
-                          lr=lr,
-                          momentum=0.9,
-                          weight_decay=0.0005)
-
+#     optimizer = optim.SGD(net.parameters(),
+#                           lr=lr,
+#                           momentum=0.9,
+#                           weight_decay=0.0005)
+    optimizer = optim.Adam(net.parameters(),
+                         lr=lr,
+                         betas=(0.9, 0.999),
+                         eps=1e-3)
     criterion = nn.BCELoss()
 
     for epoch in range(epochs):
@@ -62,7 +71,7 @@ def train_net(net,
 
         for i, b in enumerate(batch(train, batch_size)):
             imgs = np.array([i[0] for i in b]).astype(np.float32)
-            true_masks = np.array([i[1] for i in b])
+            true_masks = np.array([i[1]//200 for i in b])
 
             imgs = torch.from_numpy(imgs)
             true_masks = torch.from_numpy(true_masks)
@@ -99,22 +108,20 @@ def train_net(net,
 
 
 def get_args():
-    parser = OptionParser()
-    parser.add_option('-e', '--epochs', dest='epochs', default=5, type='int',
-                      help='number of epochs')
-    parser.add_option('-b', '--batch-size', dest='batchsize', default=10,
-                      type='int', help='batch size')
-    parser.add_option('-l', '--learning-rate', dest='lr', default=0.1,
-                      type='float', help='learning rate')
-    parser.add_option('-g', '--gpu', action='store_true', dest='gpu',
-                      default=False, help='use cuda')
-    parser.add_option('-c', '--load', dest='load',
-                      default=False, help='load file model')
-    parser.add_option('-s', '--scale', dest='scale', type='float',
-                      default=0.5, help='downscaling factor of the images')
-
-    (options, args) = parser.parse_args()
-    return options
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--epochs', dest='epochs', default=5, type=int,
+                        help='number of epochs')
+    parser.add_argument('-b', '--batch-size', dest='batchsize', default=3,
+                        type=int, help='batch size')
+    parser.add_argument('-l', '--learning-rate', dest='lr', default=0.001,
+                        type=float, help='learning rate')
+    parser.add_argument('-g', '--gpu', action='store_true', dest='gpu',
+                        default=False, help='use cuda')
+    parser.add_argument('-c', '--load', dest='load',
+                        default=False, help='load file model')
+    parser.add_argument('-s', '--scale', dest='scale', type=float,
+                        default=0.5, help='downscaling factor of the images')
+    return parser.parse_args()
 
 if __name__ == '__main__':
     args = get_args()
@@ -137,7 +144,7 @@ if __name__ == '__main__':
                   gpu=args.gpu,
                   img_scale=args.scale)
     except KeyboardInterrupt:           # 异常处理👍，出错的话就会save下来
-        torch.save(net.state_dict(), 'INTERRUPTED.pth')
+        torch.save(net.state_dict(), dir_checkpoint + 'INTERRUPTED.pth')
         print('Saved interrupt')
         try:
             sys.exit(0)

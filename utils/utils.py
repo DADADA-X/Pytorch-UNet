@@ -24,8 +24,10 @@ def resize_and_crop(pilimg, scale=0.5, final_height=None):
     # 缩放和裁剪，返回nparray
     w = pilimg.size[0]
     h = pilimg.size[1]
-    newW = int(w * scale)
-    newH = int(h * scale)
+    newW = 512
+    newH = 512
+#     newW = int(w * scale)
+#     newH = int(h * scale)
 
     if not final_height:
         diff = 0

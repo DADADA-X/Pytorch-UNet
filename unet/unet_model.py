@@ -1,5 +1,5 @@
 # full assembly of the sub-parts to form the complete net
-
+import math
 import torch.nn.functional as F
 
 from .unet_parts import *
@@ -23,6 +23,14 @@ class UNet(nn.Module):
         self.up3 = up(256, 64)
         self.up4 = up(128, 64)
         self.outc = outconv(64, n_classes)
+        
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
 
     def forward(self, x):
         x1 = self.inc(x)
