@@ -113,7 +113,7 @@ def get_args():
                         help='number of epochs')
     parser.add_argument('-b', '--batch-size', dest='batchsize', default=3,
                         type=int, help='batch size')
-    parser.add_argument('-l', '--learning-rate', dest='lr', default=0.001,
+    parser.add_argument('-lr', '--learning-rate', dest='lr', default=0.001,
                         type=float, help='learning rate')
     parser.add_argument('-g', '--gpu', action='store_true', dest='gpu',
                         default=False, help='use cuda')
